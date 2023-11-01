@@ -1,0 +1,57 @@
+version: "3"
+services:
+  nginx:
+    container_name: template_nginx
+    build:
+      context: ./dev/nginx
+    volumes:
+      - ./..:/app
+    depends_on:
+      - php
+      - mysql
+    ports:
+      - "81:80"
+
+  php:
+    container_name: template_php
+    build:
+      context: ./dev/php8-fpm
+    volumes:
+      - ./..:/app
+    links:
+      - mysql
+
+  mysql:
+    container_name: template_mysql
+    image: mysql:8.0
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: 'pet'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: '123456'
+      MYSQL_ROOT_PASSWORD: '123456'
+    ports:
+      - "33061:3306"
+
+  pma:
+    container_name: template_pma
+    image: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "3128:80"
+
+  redis:
+    container_name: template_redis
+    image: redis
+    restart: always
+    env_file:
+      - ../.env
+    ports:
+      - "6380:6379"
+
+volumes:
+  mysql:
+  mysql-data:
+  mysql-log:
